@@ -77,6 +77,7 @@ mod imp {
     }
 }
 use imp::*;
+use x11_clipboard::Clipboard;
 
 fn gl_string(gl: &gl::Gles2, renderer: u32) -> Option<&CStr> {
     // SAFETY:
@@ -236,9 +237,23 @@ fn get_driver() -> Result<(String, String)> {
     ))
 }
 
+fn copy(info: &str) -> Result<()> {
+    let clip = Clipboard::new()?;
+    clip.store(
+        clip.setter.atoms.clipboard,
+        clip.setter.atoms.utf8_string,
+        info,
+    )?;
+
+    std::thread::sleep(std::time::Duration::from_millis(100));
+
+    Ok(())
+}
+
 fn main() -> Result<()> {
     let cpu = get_cpu()?;
     let uname = uname();
+
     let os_name = get_os_name()?;
     let os_arch = match uname.machine() {
         "x86_64" => "64 bit",
@@ -248,7 +263,7 @@ fn main() -> Result<()> {
     let kernel_version = uname.release();
     let (driver, driver_version) = get_driver()?;
     let ram = get_mem()?;
-    println!(
+    let info = format!(
         "\
 System Info:
 
@@ -272,5 +287,10 @@ Memory:
 \
 "
     );
+    if copy(&info).is_err() {
+        println!("{info}");
+    } else {
+        println!("Copied to clipboard")
+    }
     Ok(())
 }

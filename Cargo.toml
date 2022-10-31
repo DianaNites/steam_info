@@ -9,10 +9,7 @@ edition = "2021"
 anyhow = "1.0.66"
 raw-window-handle = "0.5.0"
 libc = "0.2.137"
-
-# [dependencies.linapi]
-# path = "../linapi"
-# default-features = false
+x11-clipboard = "0.7.0"
 
 [dependencies.glutin]
 version = "0.30.0"
