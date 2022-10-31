@@ -99,7 +99,7 @@ fn get_driver() -> Result<(String, String)> {
     let display = unsafe {
         Display::new(
             raw_display,
-            DisplayApiPreference::Glx(Box::new(register_xlib_error_hook)),
+            DisplayApiPreference::EglThenGlx(Box::new(register_xlib_error_hook)),
         )?
     };
 

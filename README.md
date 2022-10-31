@@ -8,8 +8,6 @@ without having to restart Steam on your dedicated GPU.
 As a side effect, it includes far less information about your system than
 the standard Steam system information.
 
-Only supports X11 right now because I don't use/can't test Wayland.
-
 ## Usage
 
 ```shell

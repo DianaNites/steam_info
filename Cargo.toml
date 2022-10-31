@@ -19,6 +19,8 @@ default-features = false
 features = [
     #
     "glx",
+    "egl",
+    # "wayland",
 ]
 
 [dependencies.winit]
@@ -27,6 +29,7 @@ default-features = false
 features = [
     #
     "x11",
+    # "wayland",
 ]
 
 [build-dependencies]
