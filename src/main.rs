@@ -13,7 +13,6 @@ use glutin::{
     prelude::{GlDisplay, NotCurrentGlContextSurfaceAccessor},
     surface::{SurfaceAttributesBuilder, WindowSurface},
 };
-use linapi::system::uname;
 use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
 use winit::{
     event::Event,
@@ -21,6 +20,63 @@ use winit::{
     platform::{run_return::EventLoopExtRunReturn, unix::register_xlib_error_hook},
     window::WindowBuilder,
 };
+
+mod gl {
+    #![allow(warnings)]
+    include!(concat!(env!("OUT_DIR"), "/gl_bindings.rs"));
+}
+
+mod imp {
+    use std::{ffi::CStr, mem::MaybeUninit};
+
+    // TODO: Replace with linapi
+    use libc::utsname;
+
+    #[inline]
+    fn to_cstr<'a>(ptr: *const u8) -> &'a CStr {
+        // SAFETY:
+        // kernel is always null terminated
+        unsafe { CStr::from_ptr(ptr.cast()) }
+    }
+
+    /// Uname struct
+    pub struct Uname(utsname);
+
+    impl Uname {
+        /// System name
+        pub fn sys_name(&self) -> &str {
+            to_cstr(self.0.sysname.as_ptr().cast())
+                .to_str()
+                .expect("non-ascii uname")
+        }
+
+        /// OS release version
+        pub fn release(&self) -> &str {
+            to_cstr(self.0.release.as_ptr().cast())
+                .to_str()
+                .expect("non-ascii uname")
+        }
+
+        /// Hardware architecture
+        pub fn machine(&self) -> &str {
+            to_cstr(self.0.machine.as_ptr().cast())
+                .to_str()
+                .expect("non-ascii uname")
+        }
+    }
+
+    /// Uname
+    pub fn uname() -> Uname {
+        let mut uts: MaybeUninit<utsname> = MaybeUninit::uninit();
+        // SAFETY: pointer is never null
+        let u = unsafe { libc::uname(uts.as_mut_ptr()) };
+        assert!(u >= 0, "uname call failed, should be impossible");
+        // SAFETY: uname call initialized.
+        let uts = unsafe { uts.assume_init() };
+        Uname(uts)
+    }
+}
+use imp::*;
 
 fn gl_string(gl: &gl::Gles2, renderer: u32) -> Option<&CStr> {
     // SAFETY:
@@ -80,11 +136,6 @@ fn get_os_name() -> Result<String> {
         .ok_or_else(|| anyhow!("Couldn't get LSB OS name"))?;
 
     Ok(name.trim().into())
-}
-
-mod gl {
-    #![allow(warnings)]
-    include!(concat!(env!("OUT_DIR"), "/gl_bindings.rs"));
 }
 
 fn get_driver() -> Result<(String, String)> {
@@ -193,7 +244,6 @@ fn main() -> Result<()> {
         "x86_64" => "64 bit",
         a => a,
     };
-    // let os = format!(r#"{os_name} ({os_arch})"#);
     let kernel_name = uname.sys_name();
     let kernel_version = uname.release();
     let (driver, driver_version) = get_driver()?;
