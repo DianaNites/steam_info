@@ -184,7 +184,10 @@ fn get_driver() -> Result<(String, String)> {
             return;
         }
         control_flow.set_exit();
-        let window = match WindowBuilder::new().build(event_loop_window_target) {
+        let window = match WindowBuilder::new()
+            .with_visible(false)
+            .build(event_loop_window_target)
+        {
             Ok(w) => w,
             Err(_) => return,
         };
