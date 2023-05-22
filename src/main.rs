@@ -17,7 +17,7 @@ use raw_window_handle::{HasRawDisplayHandle, HasRawWindowHandle};
 use winit::{
     event::Event,
     event_loop::EventLoop,
-    platform::{run_return::EventLoopExtRunReturn, unix::register_xlib_error_hook},
+    platform::{run_return::EventLoopExtRunReturn, x11::register_xlib_error_hook},
     window::WindowBuilder,
 };
 
