@@ -3,8 +3,7 @@ name = "steam_info"
 version = "0.1.0"
 edition = "2021"
 repository = "https://github.com/DianaNites/steam_info"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+publish = false
 
 [dependencies]
 anyhow = "1.0.71"
